@@ -7,7 +7,7 @@
 from docx2python import docx2python
 import re
 from bs4 import BeautifulSoup as bs
-
+import json
 from pdfminer.high_level import extract_text
 import docx2txt
 import ntpath
@@ -26,10 +26,13 @@ from nltk.corpus import stopwords
 # In[104]:
 
 
-reserved_words = {'contact':['contact','name','email','linkedin'],'objective':['objective','executive summary'],
-                  'education':['education','qualification']
-                  ,'experience':['exp.','experience','work summary','demonstrated'],'skill':['skill','expertise']}
+# reserved_words = {'contact':['contact','name','email','linkedin'],'objective':['objective','executive summary'],
+#                   'education':['education','qualification']
+#                   ,'experience':['exp.','experience','work summary','demonstrated'],'skill':['skill','expertise']}
 
+f = open('reserved_words.json',)
+reserved_words = json.load(f)
+f.close()
 
 # In[105]:
 
@@ -89,15 +92,27 @@ def check(string,substring):
 def title_dict(header,reserved_words):
     title = {}
     
-
     for a in range(0,len(header)):
         for b in reserved_words:
             d = check(header[a].lower(),reserved_words[b])
             if d == True:
                 if b in title:
                     title[b].append(header[a])
+                    if header[a].lower() not in reserved_words[b]:
+                        reserved_words[b].append(header[a].lower())
+                    else:
+                        continue
+                    
                 else:
                     title[b] = [header[a]]
+                    if header[a].lower() not in reserved_words[b]:
+                        reserved_words[b].append(header[a].lower())
+                    else:
+                        continue
+    
+    with open("reserved_words.json", "w") as outfile: 
+        json.dump(reserved_words, outfile)                
+    
     return title
 
 
