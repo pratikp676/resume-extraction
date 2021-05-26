@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[87]:
-
+# Import the necessary library
 
 from docx2python import docx2python
 import re
@@ -23,19 +22,15 @@ from spacy.matcher import Matcher
 from nltk.corpus import stopwords
 
 
-# In[104]:
 
-
-# reserved_words = {'contact':['contact','name','email','linkedin'],'objective':['objective','executive summary'],
-#                   'education':['education','qualification']
-#                   ,'experience':['exp.','experience','work summary','demonstrated'],'skill':['skill','expertise']}
+# We have created a json file to store the keywords of different sections.The following code is reading that json file.
 
 f = open('reserved_words.json',)
 reserved_words = json.load(f)
 f.close()
 
-# In[105]:
 
+# The following function reads the docx files and convert the text of that file into BeautifulSoup object.
 
 def read_docx(path):
     file = docx2python(path,html=True)
@@ -44,8 +39,7 @@ def read_docx(path):
     return soup
 
 
-# In[106]:
-
+# The following function takes the BeautifulSoup object as an input and returns the size of all the fonts available in the text. 
 
 def find_font_size(soup):
     fonts = soup.find_all('font')
@@ -58,9 +52,8 @@ def find_font_size(soup):
     
     return font_size_list
 
-
-# In[107]:
-
+	
+# The following function takes the BeautifulSoup object and list of font size as an input and returns the list of bold headings from the text using the font size.
 
 def find_header(soup,font_size_list):
     header = []
@@ -74,9 +67,7 @@ def find_header(soup,font_size_list):
     return header
         
 
-
-# In[108]:
-
+# This function checks whether the given substring is part of the given string.
 
 def check(string,substring):
     found = False
@@ -86,8 +77,7 @@ def check(string,substring):
     return found
 
 
-# In[109]:
-
+# This function takes the list of the bold header and reserved words as an input and returns the dictionary of matched keys from json files and value from headers.
 
 def title_dict(header,reserved_words):
     title = {}
@@ -116,8 +106,7 @@ def title_dict(header,reserved_words):
     return title
 
 
-# In[110]:
-
+# This function takes the dict of required sections and generate the score out of 100 as per the sections available in the dict.
 
 def score_generator(required_sections):
     total_score = 0
@@ -135,8 +124,7 @@ def score_generator(required_sections):
     return total_score
 
 
-# In[111]:
-
+# This function takes the text and list of headers and returns the sections as a dict using header[i] as a starting point and header[i+1] as ending point.
 
 def generate_section(text,header):
     section = {}
@@ -155,9 +143,7 @@ def generate_section(text,header):
     return section
     
 
-
-# In[112]:
-
+# First, we have loaded the 'en_core_web_sm' model from spacy.The extract_name() function takes the text as an input and return the available names from the text.
 
 nlp = spacy.load('en_core_web_sm')
 matcher = Matcher(nlp.vocab)
@@ -177,6 +163,9 @@ def extract_name(resume_text):
         name.append(span.text)
         return name
 
+		
+# The following function uses regular expression to find the appropriate pattern of phone numbers from the text and returns the list of all available phone numbers from the text.
+
 
 PHONE_REG = re.compile(r'[\+\(]?[1-9][0-9 .\-\(\)]{8,}[0-9]')
 def extract_phone_number(input_text):
@@ -192,10 +181,14 @@ def extract_phone_number(input_text):
     return None
 
 
+# The following function uses regular expression to find the appropriate pattern of Email address from the text and returns the list of all available email ids from the text.
+
 EMAIL_REG = re.compile(r'[a-z0-9\.\-+_]+@[a-z0-9\.\-+_]+\.[a-z]+')
 def extract_emails(input_text):
     return re.findall(EMAIL_REG, input_text)
 
+
+# The following function uses regular expression to find the appropriate pattern of linkedin profile from the text and returns the list of all available profile links from the text.
 
 LINKED_REG = re.compile(r'https\:\/\/www\.linkedin+\.[a-zA-Z0-9/~\-_,&=\?\.;]+[^\.,\s<]')
 
@@ -203,8 +196,7 @@ def extract_linkedin(input_text):
     return re.findall(LINKED_REG, input_text)
 
 
-# In[113]:
-
+# The following function checks whether the 'contact' section is available in the text. It takes the first section of the generated section and find that any of the contact details is available or not. If fond, then function returns True otherwise it returns False. 
 
 def check_contact_info(sections,header):
     contact_found = False
@@ -219,8 +211,7 @@ def check_contact_info(sections,header):
     return contact_found
 
 
-# In[114]:
-
+# This function returns the only required sections (such as 'contact','objective','experience','education','skills').
 
 def generate_required_sections(sections,header,title):
     required_section = {}
@@ -237,8 +228,7 @@ def generate_required_sections(sections,header,title):
     return required_section
 
 
-# In[139]:
-
+# The main function (starting point of the program execution).
 
 if __name__=='__main__':
     soup = read_docx('sample/resume.docx')
@@ -255,7 +245,7 @@ if __name__=='__main__':
 #     print(sections)
 #     print(header)
 #     print('-------------------------------------------------------------------------')
-#     print('Title: ',title)
+    print('Title: ',title)
 #     print('-------------------------------------------------------------------------')
     
 #     print('-------------------------------------------------------------------------')
@@ -270,10 +260,6 @@ if __name__=='__main__':
     print('-------------------------------------------------------------------------')
     print('Score: ',score)
 #     print(check_contact)
-
-
-# In[ ]:
-
 
 
 
