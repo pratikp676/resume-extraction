@@ -20,6 +20,8 @@ import re
 import spacy
 from spacy.matcher import Matcher
 from nltk.corpus import stopwords
+import win32com.client
+import os
 
 
 
@@ -33,11 +35,29 @@ f.close()
 # The following function reads the docx files and convert the text of that file into BeautifulSoup object.
 
 def read_docx(path):
-    file = docx2python(path,html=True)
-    soup = bs(file.text)
-    
-    return soup
+    file_ext = ntpath.basename(path)
+    filename = file_ext.split('.')
+    if filename[1] == 'pdf':
+        word = win32com.client.Dispatch("Word.Application")
+        word.visible = 0
 
+        mypath = 'C:\\Users\\Admin\\Desktop\\JupyterProjects\\Upmovv\\'
+        filename = os.path.basename(path)
+        todocx = os.path.abspath(mypath + filename[0:-4] + ".docx")
+        wb1 = word.Documents.Open(path)
+        file1 = wb1.SaveAs(todocx, FileFormat=16)  # file format for docx
+        wb1.Close()
+        word.Quit()
+        file55 = mypath + (filename[0:-4] + ".docx")
+        file123 = docx2python(file55, html=True)
+        soup = bs(file123.text)
+        return soup
+
+    if filename[1] == 'docx':
+        file = docx2python(path, html=True)
+        soup = bs(file.text)
+
+        return soup
 
 # The following function takes the BeautifulSoup object as an input and returns the size of all the fonts available in the text. 
 
